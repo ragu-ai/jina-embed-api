@@ -1,3 +1,4 @@
+from functools import cached_property
 import time
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -26,6 +27,10 @@ except Exception as e:
 
 class EmbeddingRequest(BaseModel):
     texts: List[str]
+
+    @cached_property
+    def size(self) -> int:
+        return len(self.texts)
 
 def use_torch(request: EmbeddingRequest, max_length: int = None):
     # Tokenize the input texts
@@ -56,12 +61,13 @@ async def create_embeddings(request: EmbeddingRequest, task: Optional[str] = Non
             embeddings = use_torch(request, max_length)
         
         process_time = time.time() - start_time
+        print(f"Processed {request.size} texts in {process_time:.2f} seconds")
         
         return {
             "embeddings": embeddings,
             "dimensions": len(embeddings[0]),
             "processing_time_ms": round(process_time * 1000, 2),
-            "texts_processed": len(request.texts)
+            "texts_processed": request.size
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Embedding generation failed: {str(e)}")
