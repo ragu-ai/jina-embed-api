@@ -1,13 +1,13 @@
 import time
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 import torch
 from transformers import AutoModel, AutoTokenizer
 
 # Check if CUDA is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-max_length = 8192
+_max_length = 8192
 print(f"Using device: {device}")
 
 app = FastAPI(title="Jina Embeddings API")
@@ -27,19 +27,33 @@ except Exception as e:
 class EmbeddingRequest(BaseModel):
     texts: List[str]
 
-@app.post("/embed")
-async def create_embeddings(request: EmbeddingRequest):
-    start_time = time.time()
+def use_torch(request: EmbeddingRequest, max_length: int = None):
+    # Tokenize the input texts
+    inputs = tokenizer(request.texts, padding=True, truncation=True, 
+                        return_tensors="pt", max_length=(max_length or _max_length)).to(device)
     
+    # Generate embeddings
+    with torch.no_grad():
+        outputs = model(**inputs)
+        embeddings = outputs.last_hidden_state[:, 0].cpu().numpy().tolist()
+    
+    return embeddings
+    
+
+def use_task(request: EmbeddingRequest, task: str, max_length: int = None):
+        embeddings = model.encode(request.texts, task=task, max_length=(max_length or _max_length))
+        return embeddings.tolist()
+
+
+@app.post("/embed")
+async def create_embeddings(request: EmbeddingRequest, task: Optional[str] = None, max_length: Optional[int] = None):
+    
+    start_time = time.time()
     try:
-        # Tokenize the input texts
-        inputs = tokenizer(request.texts, padding=True, truncation=True, 
-                          return_tensors="pt", max_length=max_length).to(device)
-        
-        # Generate embeddings
-        with torch.no_grad():
-            outputs = model(**inputs)
-            embeddings = outputs.last_hidden_state[:, 0].cpu().numpy().tolist()
+        if task:
+            embeddings = use_task(request, task, max_length)
+        else:
+            embeddings = use_torch(request, max_length)
         
         process_time = time.time() - start_time
         
@@ -51,6 +65,7 @@ async def create_embeddings(request: EmbeddingRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Embedding generation failed: {str(e)}")
+    
 
 @app.get("/")
 async def root():
