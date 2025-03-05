@@ -9,7 +9,7 @@ pip install -r requirements-cuda.txt
 NUM_WORKERS=${NUM_WORKERS:-2}
 
 # Run uvicorn with optimized settings
-uvicorn app:app \
+uvicorn app.main:app \
   --host 0.0.0.0 \
   --port 8000 \
   --workers $NUM_WORKERS \
