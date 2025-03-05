@@ -9,10 +9,9 @@ pip install -r requirements-cuda.txt
 NUM_WORKERS=${NUM_WORKERS:-2}
 
 # Run uvicorn with optimized settings
-cd ~/embeddings_api
 uvicorn app:app \
   --host 0.0.0.0 \
-  --port 80 \
+  --port 8000 \
   --workers $NUM_WORKERS \
   --log-level info \
   --limit-concurrency 30 \
