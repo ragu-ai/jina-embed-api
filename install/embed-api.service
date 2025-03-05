@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=ec2-user
 WorkingDirectory=/home/ec2-user/jina-embed-api
-ExecStart=/home/ec2-user/app/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --log-level info --limit-concurrency 30 --timeout-keep-alive 120
+ExecStart=/home/ec2-user/.local/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --log-level info --limit-concurrency 30 --timeout-keep-alive 120
 Restart=always
 RestartSec=10
 
