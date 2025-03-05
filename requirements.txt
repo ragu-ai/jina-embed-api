@@ -1,0 +1,8 @@
+transformers
+sentence-transformers
+accelerate
+bitsandbytes
+fastapi
+uvicorn[standard]
+pydantic
+einops

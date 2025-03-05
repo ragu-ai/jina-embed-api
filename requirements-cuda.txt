@@ -1,0 +1,15 @@
+# Main packages
+transformers
+accelerate
+bitsandbytes
+fastapi
+uvicorn[standard]
+pydantic
+einops
+requests
+
+# PyTorch (special installation)
+--extra-index-url https://download.pytorch.org/whl/cu118
+torch
+torchvision
+torchaudio
