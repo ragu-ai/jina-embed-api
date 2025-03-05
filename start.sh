@@ -2,7 +2,7 @@
 
 
 echo "installing requirements"
-pip install -r requirements-cuda.txt
+pip install -r ./install/requirements-cuda.txt
 
 # Set the number of workers
 # G5.xlarge has 4 vCPUs, so 2-3 workers is appropriate
