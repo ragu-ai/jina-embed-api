@@ -52,7 +52,7 @@ def use_task(request: EmbeddingRequest, task: str, max_length: int = None):
 
 @app.post("/embed")
 async def create_embeddings(request: EmbeddingRequest, task: Optional[str] = None, max_length: Optional[int] = None):
-    print(f"Peceived batch request of size: {len(request.texts)}")
+    print(f"Received batch request of size: {request.size}")
     start_time = time.time()
     try:
         if task:
