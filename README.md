@@ -94,24 +94,103 @@ Generates embeddings for a list of texts.
 }
 ```
 
-### Using the LlamaIndex Client
-
-The repository includes a client class for easy integration with LlamaIndex:
+### Using with  LlamaIndex
 
 ```python
-from embedding_client import JinaEmbedAPI
+from enum import Enum
+from pydantic import Field
+import requests
+import time
+import random
+import logging
+from typing import List, Optional, Any
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+
+from llama_index.core.embeddings.base import BaseEmbedding, Embedding
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class CustomEmbeddingsAPI(BaseEmbedding):
+    """Embedding class for Jina Embeddings API with retry and backoff."""
+
+    class EmbedTask(Enum):
+        PASSAGE = "retrieval.passage"
+        QUERY = "retrieval.query"
+    
+    api_url: str = Field(description="URL of the Jina embeddings API")
+    api_timeout: int = Field(description="API Timeout")
+    embed_task: Optional[EmbedTask] = Field(description="Embedding Mode")
+    max_length: Optional[int] = Field(description="Maximum length of input text to use")
+    
+    def __init__(
+        self,
+        api_url: str,
+        model_name: str = "jinaai/jina-embeddings-v3",
+        embed_batch_size: int = 10,
+        num_workers: Optional[int] = None,
+        api_timeout: int = 60,
+        embed_task: EmbedTask = None,
+        max_length: Optional[int] = None,
+        **kwargs: Any,
+    ):
+        """
+        Initialize the CustomEmbeddingsAPI.
+        
+        Args:
+            api_url: URL of the Jina embeddings API endpoint
+            model_name: Name of the model
+            embed_batch_size: Maximum batch size for embedding requests
+            num_workers: Number of async workers
+            api_timeout: Timeout for API requests in seconds
+            embed_task: Task-specific embedding mode
+            max_length: Maximum token length for inputs
+        """
+        # Only pass parameters that BaseEmbedding expects
+        super().__init__(
+            model_name=model_name,
+            embed_batch_size=embed_batch_size,
+            num_workers=num_workers,
+            **kwargs
+        )
+        
+        # Set instance variables
+        self.api_url = api_url
+        self.api_timeout = api_timeout
+        self.embed_task = embed_task
+        self.max_length = max_length
+        
+        # Verify API connectivity on initialization
+        self._check_api_connection()
+
+    # Rest of implementation...
+
+# Example usage:
+embedding_client = CustomEmbeddingsAPI(
+    api_url="http://localhost:8000",
+    embed_task=CustomEmbeddingsAPI.EmbedTask.PASSAGE,
+    embed_batch_size=20
+)
+
+# Use with LlamaIndex
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
 
-# Initialize the embedding client
-embedder = JinaEmbedAPI(api_url="http://your-server:8000")
-
-# Load documents and create index
+# Load documents
 documents = SimpleDirectoryReader("./data").load_data()
-index = VectorStoreIndex.from_documents(documents, embed_model=embedder)
 
-# Search with the same embedding client
+# Create index with custom embeddings
+index = VectorStoreIndex.from_documents(
+    documents, 
+    embed_model=embedding_client
+)
+
+# Create a query engine
 query_engine = index.as_query_engine()
-response = query_engine.query("Your question here")
+
+# Execute a search query
+response = query_engine.query("Your search query here")
+print(response)
 ```
 
 ## Task-Specific Embeddings
