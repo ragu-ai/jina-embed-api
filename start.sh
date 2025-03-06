@@ -14,5 +14,6 @@ uvicorn app.main:app \
   --port 8000 \
   --workers $NUM_WORKERS \
   --log-level info \
-  --limit-concurrency 30 \
-  --timeout-keep-alive 120
+  --limit-concurrency 20 \
+  --timeout-keep-alive 120 \
+  --backlog 1024 \
