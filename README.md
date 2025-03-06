@@ -145,7 +145,7 @@ This project is maintained by Kevin Williams at [Ragu.ai](https://ragu.ai).
 ### Contact
 
 For questions or support, please reach out to us at:
-- Email: [kevin@ragu.ai or your preferred email]
+- Email: kevin@ragu.ai
 - GitHub Issues: Please file any bugs or feature requests through the issue tracker on this repository
 
 Ragu.ai provides AI tools and APIs to help businesses integrate AI into their workflows.
