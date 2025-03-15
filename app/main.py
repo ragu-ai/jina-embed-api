@@ -5,11 +5,27 @@ from pydantic import BaseModel
 from typing import List, Optional
 import torch
 from transformers import AutoModel, AutoTokenizer
+import sentry_sdk
+import os
+
+
+environment = os.getenv("ENVIRONMENT", "development")
 
 # Check if CUDA is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 _max_length = 8192
 print(f"Using device: {device}")
+
+
+sentry_sdk.init(
+        dsn="https://56ae6f42993cb26c70fd9c8e9c8dd9ae@o4508978501058560.ingest.us.sentry.io/4508982717972480",
+        send_default_pii=True,
+        shutdown_timeout=5,
+        # Add unique process identification to help debugging
+        release=f"ragu-embeddings-{os.getpid()}",
+        # Set environment based on your settings
+        environment=environment,
+    )
 
 app = FastAPI(title="Jina Embeddings API")
 
@@ -74,8 +90,13 @@ async def create_embeddings(request: EmbeddingRequest, task: Optional[str] = Non
     
 
 @app.get("/")
-async def root():
+async def healthcheck():
     return {"message": "Jina Embeddings API is running", "model": model_name}
+
+@app.get("/sentry-debug")
+async def trigger_error():
+    division_by_zero = 1 / 0
+    return {"message": "This will never be reached"}
 
 if __name__ == "__main__":
     import uvicorn
