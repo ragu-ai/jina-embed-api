@@ -24,7 +24,7 @@ sentry_sdk.init(
         send_default_pii=True,
         shutdown_timeout=5,
         # Add unique process identification to help debugging
-        release=f"ragu-embeddings-{os.getpid()}",
+        release=f"ragu-embeddings-{environment}-{os.getpid()}",
         # Set environment based on your settings
         environment=environment,
     )
