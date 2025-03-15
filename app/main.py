@@ -14,7 +14,9 @@ environment = os.getenv("ENVIRONMENT", "development")
 # Check if CUDA is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 _max_length = 8192
+
 print(f"Using device: {device}")
+print(f"Environment: {environment}")
 
 
 sentry_sdk.init(
