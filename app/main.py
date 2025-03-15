@@ -93,7 +93,7 @@ async def create_embeddings(request: EmbeddingRequest, task: Optional[str] = Non
 
 @app.get("/")
 async def healthcheck():
-    return {"message": "Jina Embeddings API is running", "model": model_name}
+    return {"message": "Jina Embeddings API is running", "model": model_name, "environment": environment}
 
 @app.get("/sentry-debug")
 async def trigger_error():
