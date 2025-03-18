@@ -7,7 +7,9 @@ import torch
 from transformers import AutoModel, AutoTokenizer
 import sentry_sdk
 import os
+from dotenv import load_dotenv
 
+load_dotenv(override=False)
 
 environment = os.getenv("ENVIRONMENT", "development")
 sentry_dsn = os.getenv("SENTRY_DSN", None)

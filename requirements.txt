@@ -10,3 +10,4 @@ torch
 torchvision
 torchaudio
 sentry-sdk[fastapi]
+python-dotenv

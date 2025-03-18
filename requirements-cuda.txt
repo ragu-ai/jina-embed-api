@@ -8,6 +8,7 @@ pydantic
 einops
 requests
 sentry-sdk[fastapi]
+python-dotenv
 
 # PyTorch (special installation)
 --extra-index-url https://download.pytorch.org/whl/cu118
