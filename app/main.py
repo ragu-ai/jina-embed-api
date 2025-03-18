@@ -10,6 +10,7 @@ import os
 
 
 environment = os.getenv("ENVIRONMENT", "development")
+sentry_dsn = os.getenv("SENTRY_DSN", None)
 
 # Check if CUDA is available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -17,17 +18,19 @@ _max_length = 8192
 
 print(f"Using device: {device}")
 print(f"Environment: {environment}")
+print(f"sentry_dsn: {sentry_dsn}")
 
+if sentry_dsn:
+    sentry_sdk.init(
+            dsn=sentry_dsn,
+            send_default_pii=True,
+            shutdown_timeout=5,
+            # Add unique process identification to help debugging
+            release=f"ragu-embeddings-{environment}-{os.getpid()}",
+            # Set environment based on your settings
+            environment=environment,
+        )
 
-sentry_sdk.init(
-        dsn="https://56ae6f42993cb26c70fd9c8e9c8dd9ae@o4508978501058560.ingest.us.sentry.io/4508982717972480",
-        send_default_pii=True,
-        shutdown_timeout=5,
-        # Add unique process identification to help debugging
-        release=f"ragu-embeddings-{environment}-{os.getpid()}",
-        # Set environment based on your settings
-        environment=environment,
-    )
 
 app = FastAPI(title="Jina Embeddings API")
 
