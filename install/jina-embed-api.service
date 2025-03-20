@@ -5,9 +5,23 @@ After=network.target
 [Service]
 User=ec2-user
 WorkingDirectory=/home/ec2-user/jina-embed-api
-ExecStart=/home/ec2-user/.local/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2 --log-level info --limit-concurrency 24 --timeout-keep-alive 120 --backlog 1024
-Restart=always
+# Use single worker for GPU-based API
+ExecStart=/home/ec2-user/.local/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --log-level info --limit-concurrency 8 --timeout-keep-alive 120 --backlog 512
+
+# Environment variables for GPU optimization
+Environment="PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128"
+Environment="CUDA_VISIBLE_DEVICES=0"
+
+# Provide more memory for the service
+MemoryHigh=16G
+MemoryMax=20G
+
+# Set proper restart policy
+Restart=on-failure
 RestartSec=10
+
+# Extend timeout for model loading
+TimeoutStartSec=300
 
 [Install]
 WantedBy=multi-user.target
